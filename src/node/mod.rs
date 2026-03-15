@@ -1,5 +1,7 @@
+use anyhow::anyhow;
 use chrono::{DateTime, Utc};
-use rusqlite::Connection;
+
+use crate::db::ConnectionTrait;
 
 pub struct Node {
     id: u32,
@@ -18,7 +20,11 @@ impl Node {
         println!("  Updated At: {}", self.updated_at);
     }
 
-    pub fn get_all(conn: &Connection) -> anyhow::Result<Vec<Self>> {
+    pub fn get_all<T: ConnectionTrait>(db: T) -> anyhow::Result<Vec<Self>> {
+        let Some(conn) = db.connection() else {
+            return Err(anyhow!("No connection available"));
+        };
+
         let mut stmt = conn
             .prepare("select id, title, url, created_at, updated_at from nodes order by id desc")?;
         let nodes = stmt.query_map([], |r| {

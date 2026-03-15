@@ -5,6 +5,10 @@ pub struct Db {
     connection: Option<Connection>,
 }
 
+pub trait ConnectionTrait {
+    fn connection(&self) -> Option<&Connection>;
+}
+
 impl Db {
     pub fn new() -> Self {
         Self { connection: None }
@@ -62,8 +66,10 @@ impl Db {
 
         Ok(())
     }
+}
 
-    pub fn connection(&self) -> Option<&Connection> {
+impl ConnectionTrait for Db {
+    fn connection(&self) -> Option<&Connection> {
         self.connection.as_ref()
     }
 }

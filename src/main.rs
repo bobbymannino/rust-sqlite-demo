@@ -10,7 +10,7 @@ fn main() -> anyhow::Result<()> {
     db.connect_memory()?;
     db.init_tables()?;
     db.seed_tables()?;
-    let nodes = Node::get_all(db.connection().unwrap())?;
+    let nodes = Node::get_all(db)?;
     for node in nodes {
         node.pretty_print();
     }
