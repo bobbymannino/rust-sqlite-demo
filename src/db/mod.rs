@@ -28,6 +28,20 @@ impl Db {
         Ok(())
     }
 
+    pub fn connect_file(&mut self, path: &str) -> anyhow::Result<()> {
+        if self.connection.is_some() {
+            return Err(anyhow!("Already connected"));
+        }
+
+        let Ok(conn) = Connection::open(path) else {
+            return Err(anyhow!("Failed to connected"));
+        };
+
+        self.connection = Some(conn);
+
+        Ok(())
+    }
+
     pub fn init_tables(&self) -> anyhow::Result<()> {
         let Some(conn) = self.connection.as_ref() else {
             return Err(anyhow!("Database not connected"));
@@ -35,7 +49,7 @@ impl Db {
 
         conn.execute(
             "
-        CREATE table nodes (
+        CREATE table if not exists nodes (
             id integer primary key autoincrement,
             title text not null,
             url text,

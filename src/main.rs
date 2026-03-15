@@ -7,7 +7,7 @@ fn main() -> anyhow::Result<()> {
     env_logger::init();
 
     let mut db = Db::new();
-    db.connect_memory()?;
+    db.connect_file("test.db")?;
     db.init_tables()?;
     db.seed_tables()?;
     let nodes = Node::get_all(db)?;
