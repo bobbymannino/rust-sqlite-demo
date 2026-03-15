@@ -1,3 +1,4 @@
+use chrono::{DateTime, Utc};
 use rusqlite::Connection;
 
 fn main() -> anyhow::Result<()> {
@@ -18,6 +19,8 @@ struct Node {
     id: u32,
     title: String,
     url: Option<String>,
+    createdAt: DateTime<Utc>,
+    updatedAt: DateTime<Utc>,
 }
 
 impl Node {
@@ -25,15 +28,20 @@ impl Node {
         println!("Node #{}", self.id);
         println!("  Title: {}", self.title);
         println!("  URL: {:?}", self.url);
+        println!("  Created At: {}", self.createdAt);
+        println!("  Updated At: {}", self.updatedAt);
     }
 
     fn get_all(conn: &Connection) -> anyhow::Result<Vec<Self>> {
-        let mut stmt = conn.prepare("select id, title, url from nodes order by id desc")?;
+        let mut stmt = conn
+            .prepare("select id, title, url, created_at, updated_at from nodes order by id desc")?;
         let nodes = stmt.query_map([], |r| {
             Ok(Node {
                 id: r.get(0)?,
                 title: r.get(1)?,
                 url: r.get(2)?,
+                createdAt: r.get(3)?,
+                updatedAt: r.get(4)?,
             })
         })?;
         let nodes_vec: Vec<Node> = nodes.collect::<Result<Vec<_>, _>>()?;
