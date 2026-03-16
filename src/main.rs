@@ -8,7 +8,7 @@ fn main() -> anyhow::Result<()> {
 
     let mut db = Db::new();
     db.connect_file("test.db")?;
-    db.init_tables()?;
+    db.migrate()?;
     db.seed_tables()?;
     let nodes = Node::get_all(db)?;
     for node in nodes {

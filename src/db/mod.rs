@@ -1,5 +1,17 @@
 use anyhow::anyhow;
 use rusqlite::Connection;
+use rusqlite_migration::{M, Migrations};
+
+const MIGRATIONS_SLICE: &[M<'_>] = &[M::up(
+    "CREATE table if not exists nodes (
+    id integer primary key autoincrement,
+    title text not null,
+    url text,
+    created_at datetime default current_timestamp,
+    updated_at datetime default current_timestamp
+    )",
+)];
+const MIGRATIONS: Migrations<'_> = Migrations::from_slice(MIGRATIONS_SLICE);
 
 pub struct Db {
     connection: Option<Connection>,
@@ -42,22 +54,12 @@ impl Db {
         Ok(())
     }
 
-    pub fn init_tables(&self) -> anyhow::Result<()> {
-        let Some(conn) = self.connection.as_ref() else {
+    pub fn migrate(&mut self) -> anyhow::Result<()> {
+        let Some(conn) = self.connection.as_mut() else {
             return Err(anyhow!("Database not connected"));
         };
 
-        conn.execute(
-            "
-        CREATE table if not exists nodes (
-            id integer primary key autoincrement,
-            title text not null,
-            url text,
-            created_at datetime default current_timestamp,
-            updated_at datetime default current_timestamp
-        )",
-            (),
-        )?;
+        MIGRATIONS.to_latest(conn)?;
 
         Ok(())
     }
